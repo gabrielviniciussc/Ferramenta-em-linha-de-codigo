@@ -1,0 +1,86 @@
+import Foundation
+
+// Função para contar palavras em um arquivo
+func countWords(in filePath: String) -> Int? {
+    do {
+        let content = try String(contentsOfFile: filePath, encoding: .utf8)
+        let words = content.split { $0.isWhitespace || $0.isNewline }
+        return words.count
+    } catch {
+        print("Erro ao ler o arquivo: \(error)")
+        return nil
+    }
+}
+
+// Função para buscar uma palavra em um arquivo
+func searchWord(in filePath: String, word: String) {
+    do {
+        let content = try String(contentsOfFile: filePath, encoding: .utf8)
+        let lines = content.split(separator: "\n")
+        var found = false
+        
+        for (index, line) in lines.enumerated() {
+            if line.contains(word) {
+                print("Palavra '\(word)' encontrada na linha \(index + 1): \(line)")
+                found = true
+            }
+        }
+        
+        if !found {
+            print("Palavra '\(word)' não encontrada.")
+        }
+    } catch {
+        print("Erro ao ler o arquivo: \(error)")
+    }
+}
+
+// Função para substituir uma palavra em um arquivo
+func replaceWord(in filePath: String, target: String, replacement: String) {
+    do {
+        var content = try String(contentsOfFile: filePath, encoding: .utf8)
+        content = content.replacingOccurrences(of: target, with: replacement)
+        try content.write(toFile: filePath, atomically: true, encoding: .utf8)
+        print("Palavra '\(target)' substituída por '\(replacement)'.")
+    } catch {
+        print("Erro ao modificar o arquivo: \(error)")
+    }
+}
+
+// Função principal que processa os comandos do usuário
+func main() {
+    guard CommandLine.arguments.count > 2 else {
+        print("Uso: swift cli_tool.swift <comando> <caminho_do_arquivo> [opções]")
+        print("Comandos disponíveis: count, search, replace")
+        return
+    }
+    
+    let command = CommandLine.arguments[1]
+    let filePath = CommandLine.arguments[2]
+    
+    switch command {
+    case "count":
+        if let wordCount = countWords(in: filePath) {
+            print("Total de palavras: \(wordCount)")
+        }
+    case "search":
+        guard CommandLine.arguments.count > 3 else {
+            print("Uso: swift cli_tool.swift search <caminho_do_arquivo> <palavra>")
+            return
+        }
+        let wordToSearch = CommandLine.arguments[3]
+        searchWord(in: filePath, word: wordToSearch)
+    case "replace":
+        guard CommandLine.arguments.count > 4 else {
+            print("Uso: swift cli_tool.swift replace <caminho_do_arquivo> <palavra_antiga> <palavra_nova>")
+            return
+        }
+        let targetWord = CommandLine.arguments[3]
+        let replacementWord = CommandLine.arguments[4]
+        replaceWord(in: filePath, target: targetWord, replacement: replacementWord)
+    default:
+        print("Comando desconhecido. Use: count, search, replace.")
+    }
+}
+
+// Iniciar a aplicação
+main()
