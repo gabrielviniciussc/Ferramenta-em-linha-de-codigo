@@ -1,5 +1,3 @@
-import Foundation
-
 // Função para contar palavras em um arquivo
 func countWords(in filePath: String) -> Int? {
     do {
